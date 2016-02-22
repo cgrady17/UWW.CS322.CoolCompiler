@@ -1,5 +1,12 @@
 # UWW.CS322.CoolCompiler
-Compiler for the COOL programming language written in Java
+Compiler for the COOL programming language written in Java.
+
+## Lexer
+The Lexer, also known as a Scanner, is responsible for reading and tracking each character of the COOL code
+and grouping those characters into known lexeme.
+
+## Parser
+The Parser analyzes the lexeme to determine it's grammatical structure with respect to a specified formal grammar.
 
 ## License
 The MIT License (MIT)
