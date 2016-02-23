@@ -1,5 +1,7 @@
 /*
  *  The scanner definition for COOL.
+ *
+ *  @author Adam Brauns, Andrew Bronas, Brian Maresso, Connor Grady
  */
 
 import java_cup.runtime.Symbol;
@@ -21,18 +23,19 @@ import java_cup.runtime.Symbol;
 
     private int curr_lineno = 1;
     int get_curr_lineno() {
-    return curr_lineno;
+        return curr_lineno;
     }
 
     private AbstractSymbol filename;
 
     void set_filename(String fname) {
-    filename = AbstractTable.stringtable.addString(fname);
+        filename = AbstractTable.stringtable.addString(fname);
     }
 
     AbstractSymbol curr_filename() {
-    return filename;
+        return filename;
     }
+
     int commentDepth = 0;
 %}
 
@@ -61,10 +64,10 @@ break;
         /* If necessary, add code for other states here, e.g: */
         case YYCOMMENT:
             yybegin( YYEOF_ERROR );
-            return new Symbol( TokenConstants.ERROR , “Can’t have an EOF inside of a comment” );
+            return new Symbol( TokenConstants.ERROR , "Cannot have an EOF inside of a comment" );
         case YYSTRING:
             yybegin( YYEOF_ERROR );
-            return new Symbol( TokenConstants.ERROR , “Can’t have an EOF inside of a string” );
+            return new Symbol( TokenConstants.ERROR , "Cannot have an EOF inside of a string" );
         case YYEOF_ERROR:
             break;
     }
@@ -75,54 +78,53 @@ break;
 %cup
 %state YYCOMMENT,YYSTRING,YYSTRING_NEWLINE_ERR,YYSTRING_NULL_ERR,YYEOF_ERROR
 
-    DIGIT     =    [0-9]
+WHITESPACE   = [ \t\r\f\v]
+AT           = @
+ANYCHAR      = .|\r
+DIGIT        = [0-9]
+NEWLINE      = \n
 
-    IF        =    [i][f]
-    FI        =    [f][i]
-    THEN        =    [t][h][e][n]
-    ELSE        =    [e][l][s][e]
-    TRUE        =    [t][r][u][e]
-    FALSE    =    [f][a][l][s][e]
-    NOT        =     [n][o][t]
+LINECOMMENT  = --[^\n]*
+COMMENTBEGIN = \(\*
+COMMENTEND   = \*\)
 
+STRINGBEGIN  = \"
+STRINGCHARS  = [^\"\0\n\\]+
+STRINGEND    = \"
 
-IN        =    [i][n]
-    LET         =     [l][e][t]
+TYPEID       = [A-Z][A-z0-9_]*
+OBJECTID     = [a-z][A-z0-9_]*
+CLASS        = [Cc][Ll][Aa][Ss][Ss]
+NEW          = [Nn][Ee][Ww]
 
-    WHILE    =    [w][h][i][l][e]
-    LOOP        =    [l][o][o][p]
-    POOL        =    [p][o][o][l]
-    CASE        =    [c][a][s][e]
+IF           = [Ii][Ff]
+FI           = [Ff][Ii]
+THEN         = [Tt][Hh][Ee][Nn]
+ELSE         = [Ee][Ll][Ss][Ee]
+NOT          = [Nn][Oo][Tt]
 
-    NEW         =     [n][e][w]
-    CLASS    =    [c][l][a][s][s]
-    INHERITS    =    [i][n][h][e][r][i][t][s]
-    ISVOID     =    [i][s][v][o][i][d]
+IN           = [Ii][Nn]
+INHERITS     = [Ii][Nn][Hh][Ee][Rr][Ii][Tt][Ss]
+ISVOID       = [Ii][Ss][Vv][Oo][Ii][Dd]
+LET          = [Ll][Ee][Tt]
 
-    LINECOMMENT =    --[^\n]*
-    COMMENTBEGIN=    \(\*
-    COMMENTEND=    \*\)
+WHILE        = [Ww][Hh][Ii][Ll][Ee]
+LOOP         = [Ll][Oo][Oo][Pp]
+POOL         = [Pp][Oo][Oo][Ll]
 
-    STRINGBEGIN=    \"
-    STRINGEND    =    \"
-    STRINGCHARS=    [^\”\0\n\\]+
+CASE         = [Cc][Aa][Ss][Ee]
+ESAC         = [Ee][Ss][Aa][Cc]
 
-    TYPEID    =    [A-Z][A-Z0-9]*
-    OBJECTID    =    [A-Z][A-Z0-9]*
+TRUE         = t[Rr][Uu][Ee]
+FALSE        = f[Aa][Ll][Ss][Ee]
 
-    ESAC        =    [e][s][a][c]
-    AT        =    @
-
-    ANYCHAR    =    .|\r
-    WHITESPACE=    [\t\r\f\ ]
-    NEWLINE    =    \n
 %%
 
 <YYINITIAL>{IF}                    { return new Symbol(TokenConstants.IF ); }
 <YYINITIAL>{FI}                    { return new Symbol(TokenConstants.FI ); }
 <YYINITIAL>{THEN}                    { return new Symbol(TokenConstants.THEN ); }
-<YYINITIAL>{TRUE}                    { return new Symbol(TokenConstants.BOOL_CONST, “true” ); }
-<YYINITIAL>{FALSE}                    { return new Symbol(TokenConstants.BOOL_CONST, “false” ); }
+<YYINITIAL>{TRUE}                    { return new Symbol(TokenConstants.BOOL_CONST, "true" ); }
+<YYINITIAL>{FALSE}                    { return new Symbol(TokenConstants.BOOL_CONST, "false" ); }
 <YYINITIAL>{NOT}                    { return new Symbol(TokenConstants.NOT ); }
 <YYINITIAL>{ELSE}                    { return new Symbol(TokenConstants.ELSE ); }
 
@@ -140,34 +142,39 @@ IN        =    [i][n]
 <YYINITIAL>{INHERITS}                { return new Symbol(TokenConstants.INHERITS ); }
 <YYINITIAL>{ISVOID}                    { return new Symbol(TokenConstants.ISVOID ); }
 
-<YYINITIAL>{LINECOMMENT}                { ; }
+<YYINITIAL>{LINECOMMENT}            { ; }
 <YYINITIAL>{WHITESPACE}                { ; }
 <YYCOMMENT>{ANYCHAR}                { ; }
 <YYCOMMENT,YYINITIAL>{COMMENTBEGIN}    { yybegin(YYCOMMENT); commentDepth++; }
 <YYCOMMENT>{COMMENTEND}                { commentDepth--; if(commentDepth == 0) { yybegin(YYINITIAL); } }
-<YYINITIAL>{COMMENTEND}                { return new Symbol(TokenConstants.ERROR, “Unmatched Comment”); }
+<YYINITIAL>{COMMENTEND}                { return new Symbol(TokenConstants.ERROR, "Unmatched Comment"); }
 
-<YYINITIAL>{STRINGBEGIN}                { yybegin(YYSTRING); string_buf.setLength(0); }
-<YYINITIAL>{STRINGCHARS}                { string_buf.append(yytext()); }
-<YYSTRING>\x00                        { yybegin(YYSTRING_NULL_ERR); return new Symbol(TokenConstants.ERROR, “Null character encountered”); }
-<YYSTRING>\\b                        { string_buf.append(“\b”); }
-<YYSTRING>\\f                        { string_buf.append(“\f”); }
-<YYSTRING>\\t                        { string_buf.append(“\t”); }
-<YYSTRING>\\\”                        { string_buf.append(“\””); }
-<YYSTRING>\\                        { string_buf.append(“”); }
-<YYSTRING>\\\\                        { string_buf.append(“\\”); }
-<YYSTRING>\n                        { yybegin(YYINITIAL); string_buf.setLength(0);
-return new Symbol(TokenConstants.ERROR,”Unended string”); }
-<YYSTRING>\\n                        { string_buf.append(“\n”); }
-<YYSTRING>\\\n                        { string_buf.append(“\n”); }
-<YYSTRING>\\\\n                        { string_buf.append(“\\n”); }
-<YYSTRING>{STRINGEND}                { yybegin(YYINITIAL); String str = string_buf.toString();
-  if(str.length() >= MAX_STR_CONST) {
-return new Symbol(TokenConstants.ERROR, “String too long”);
-  } else {
-return new Symbol(TokenConstants.STR_CONST, new StringSymbol(str, str.length(), str.hashcode()));
-}
- }
+<YYINITIAL>{STRINGBEGIN}            { yybegin(YYSTRING); string_buf.setLength(0); }
+<YYSTRING>{STRINGCHARS}                { string_buf.append(yytext()); }
+
+<YYSTRING>\x00                        { yybegin(YYSTRING_NULL_ERR); return new Symbol(TokenConstants.ERROR, "Null character encountered"); }
+<YYSTRING>\\b                        { string_buf.append("\b"); }
+<YYSTRING>\\f                        { string_buf.append("\f"); }
+<YYSTRING>\\t                        { string_buf.append("\t"); }
+<YYSTRING>\\\"                        { string_buf.append("\""); }
+<YYSTRING>\\                        { string_buf.append(""); }
+<YYSTRING>\\\\                        { string_buf.append("\\"); }
+<YYSTRING>\n                        { string_buf.setLength(0); yybegin(YYINITIAL);
+return new Symbol(TokenConstants.ERROR, "Unended string constant. Multi line not supported."); }
+
+<YYSTRING>\\n                        { string_buf.append("\n"); }
+<YYSTRING>\\\n                        { string_buf.append("\n"); }
+<YYSTRING>\\\\n                        { string_buf.append("\\n"); }
+<YYSTRING>{STRINGEND}                { yybegin(YYINITIAL);
+                                          String s = string_buf.toString();
+                                          if(s.length() >= MAX_STR_CONST) {
+                                            return new Symbol(TokenConstants.ERROR, "String length exceeded maximum!");
+                                          } else {
+                                            return new Symbol(TokenConstants.STR_CONST,
+                                                new StringSymbol(s, s.length(), s.hashCode()));
+                                          }
+                                    }
+
 
 <YYINITIAL>\*                        { return new Symbol(TokenConstants.MULT); }
 <YYINITIAL>\/                        { return new Symbol(TokenConstants.DIV); }
@@ -194,19 +201,18 @@ return new Symbol(TokenConstants.STR_CONST, new StringSymbol(str, str.length(), 
 
 
 <YYSTRING_NULL_ERR>\n                { yybegin( YYINITIAL ); }
-<YYSTRING_NULL_ERR>\”                { yybegin( YYINITIAL ); }
+<YYSTRING_NULL_ERR>\"                { yybegin( YYINITIAL ); }
 <YYSTRING_NULL_ERR>.                { ; }
-\n                                { curr_lineno++; }
-<YYINITIAL>{DIGIT}+                    { return new Symbol( TokenConstants.INT_CONST ,
-                                        new IntSymbol( yytext() ,
-yytext().length() , yytext().hashCode() ) );}
+\n                                    { curr_lineno++; }
+<YYINITIAL>{DIGIT}+                    { return new Symbol( TokenConstants.INT_CONST, new IntSymbol( yytext(),
+yytext().length(), yytext().hashCode() ) );}
 
 <YYINITIAL>error                     {return new Symbol(TokenConstants.error);}
 
-.n|\n                            {return new Symbol(TokenConstants.ERROR, yytext());}
+.|\n                                {return new Symbol(TokenConstants.ERROR, yytext());}
 
 
-<YYINITIAL>”=>”            { /* Sample lexical rule for "=>" arrow.
+<YYINITIAL>"=>"                { /* Sample lexical rule for "=>" arrow.
                                      Further lexical rules should be defined
                                      here, after the last %% separator */
                                   return new Symbol(TokenConstants.DARROW); }
@@ -216,3 +222,7 @@ yytext().length() , yytext().hashCode() ) );}
                                      will match match everything not
                                      matched by other lexical rules. */
                                   System.err.println("LEXER BUG - UNMATCHED: " + yytext()); }
+
+
+
+
