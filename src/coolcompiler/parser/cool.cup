@@ -15,11 +15,11 @@ that was there initially.  */
 action code {: 
 
     int curr_lineno() {
-	return ((CoolTokenLexer)parser.getScanner()).curr_lineno();
+	    return ((CoolTokenLexer)parser.getScanner()).curr_lineno();
     }
 
     AbstractSymbol curr_filename() {
-	return ((CoolTokenLexer)parser.getScanner()).curr_filename();
+	    return ((CoolTokenLexer)parser.getScanner()).curr_filename();
     }
 :} 
 
@@ -36,10 +36,10 @@ parser code {:
 		         ": parse error at or near ");
         Utilities.printToken(cur_token);
 	omerrs++;
-	if (omerrs>50) {
-	   System.err.println("More than 50 errors");
-	   System.exit(1);
-	}
+        if (omerrs>50) {
+           System.err.println("More than 50 errors");
+           System.exit(1);
+        }
     }
 
     public void unrecovered_syntax_error(Symbol cur_token) {
@@ -97,11 +97,7 @@ class
 	;
 
 /* Feature list may be empty, but no empty features in list. */
-dummy_feature_list
-	::= /* empty */
-	    {: RESULT = new Features(curr_lineno()); :}
-	;
-
+/* Added feature_list */
 feature_list
     ::=
         {: RESULT = new Features(curr_lineno()); :}
